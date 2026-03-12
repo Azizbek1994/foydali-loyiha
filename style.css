@@ -1,0 +1,10 @@
+#root img {
+  width:  798px; /* Rasming kengligini o'zgartirish */
+  height: 200px; /* Balandlikni proporsional saqlash */
+  border: 4px solid green; /* Chegara qo'shish */
+  border-radius: 10px; /* Burchaklarni yumaloqlash */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* So'ya berish */
+  display: block; /* Rasmni blok elementga aylantirish */
+  margin: 0 auto; /* Rasmni markazga joylash */
+  background-color: white;
+}
