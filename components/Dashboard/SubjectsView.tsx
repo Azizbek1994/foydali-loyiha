@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { StorageService } from '../../services/storage';
 import { Test } from '../../types';
 import { ChevronRight, Calculator, Languages, Book } from 'lucide-react';
+import { title } from 'process';
 
 interface SubjectsViewProps {
   onStartTest: (test: Test) => void;
@@ -10,11 +11,11 @@ interface SubjectsViewProps {
 
 export const SubjectsView: React.FC<SubjectsViewProps> = ({ onStartTest }) => {
   const [selectedSubject, setSelectedSubject] = useState<'matematika' | 'ingliz_tili' | null>(null);
-  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
+  const [selectedGrade, setSelectedGrade] = useState<number | string | null>(null);
 
   const tests = StorageService.getTests();
 
-  const handleGradeSelect = (grade: number) => {
+  const handleGradeSelect = (grade: number | string) => {
     setSelectedGrade(grade);
   };
 
@@ -23,7 +24,11 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onStartTest }) => {
   };
 
   if (selectedSubject && selectedGrade) {
-    const gradeTests = tests.filter(t => t.subject === selectedSubject && t.grade === selectedGrade);
+    const gradeTests = tests.filter(t => {
+    const gradeValue = typeof 
+    selectedGrade ==='string' ? parseInt(selectedGrade) : selectedGrade;
+      return t.subject === selectedSubject && t.grade === gradeValue;
+     });
     
     return (
       <div className="space-y-6 animate-fadeIn">
@@ -79,14 +84,14 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onStartTest }) => {
           {selectedSubject.replace('_', ' ')}: Sinfni tanlang
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map(grade => (
+          {['1-sinf', '2-sinf', '3-sinf', '4-sinf','Muammoni hal qilish','Tanqidiy Fikirlash', '1-bosqich testlari','2-bosqich testlari'].map(grade => (
             <button
-              key={grade}
+              key={grade.toString()}
               onClick={() => handleGradeSelect(grade)}
               className="aspect-square flex flex-col items-center justify-center gap-4 bg-slate-50 border border-slate-100 rounded-2xl hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-lg transition group"
             >
               <span className="text-5xl font-black text-slate-300 group-hover:text-indigo-200 transition">{grade}</span>
-              <span className="font-bold text-slate-700">{grade}-sinf</span>
+              <span className="font-bold text-slate-700">{grade}</span>
             </button>
           ))}
         </div>
