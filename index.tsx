@@ -16,6 +16,7 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
 export const INITIAL_TESTS: Test[] = [
   {
     id: "m1-1",

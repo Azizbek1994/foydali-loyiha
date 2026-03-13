@@ -1,4 +1,3 @@
-
 import { User, TestResult, Test, Feedback } from '../types';
 import { INITIAL_TESTS } from '..';
 
@@ -33,6 +32,13 @@ export const StorageService = {
   addUser: (user: User) => {
     const users = StorageService.getUsers();
     localStorage.setItem(KEYS.USERS, JSON.stringify([...users, user]));
+  },
+
+  // Yangi qo'shilgan funksiya: Foydalanuvchi ma'lumotlarini (masalan, sessionId) yangilash uchun
+  updateUser: (updatedUser: User) => {
+    const users = StorageService.getUsers();
+    const updatedUsers = users.map(u => u.id === updatedUser.id ? updatedUser : u);
+    localStorage.setItem(KEYS.USERS, JSON.stringify(updatedUsers));
   },
 
   getTests: (): Test[] => {

@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   firstName: string;
@@ -6,6 +5,7 @@ export interface User {
   phone: string;
   secretCode: string;
   role: 'student' | 'admin';
+  sessionId?: string | null; // Sessiya nazorati uchun qo'shilgan qator
 }
 
 export interface Question {

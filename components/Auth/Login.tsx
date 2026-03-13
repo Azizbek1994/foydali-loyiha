@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { User } from '../../types';
 import { StorageService } from '../../services/storage';
-import { KeyRound, Phone, LogIn } from 'lucide-react';
+import { KeyRound, Phone, LogIn, HelpCircle, MessageCircle } from 'lucide-react';
 
 interface LoginProps {
   onLogin: (user: User) => void;
@@ -13,14 +12,26 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onToggleRegister }) => {
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  const [showSupport, setShowSupport] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
     const users = StorageService.getUsers();
     const user = users.find(u => u.phone === phone && u.secretCode === code);
 
     if (user) {
-      onLogin(user);
+      // Bir vaqtda bir necha kishi foydalanishini oldini olish mantiqi
+      // Yangi sessiya ID yaratish (masalan, vaqt tamg'asi orqali)
+      const currentSessionId = Date.now().toString();
+      
+      // Foydalanuvchi ma'lumotlarini yangilash (sessiya ID bilan)
+      const updatedUser = { ...user, sessionId: currentSessionId };
+      StorageService.updateUser(updatedUser);
+      
+      // Tizimga kirish
+      onLogin(updatedUser);
     } else {
       setError("Telefon raqam yoki maxfiy kod noto'g'ri.");
     }
@@ -49,7 +60,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onToggleRegister }) => {
 
           <div className="space-y-1">
             <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
-              <KeyRound size={16} /> Maxfiy kod
+              <KeyRound size={16} /> Parol
             </label>
             <input
               type="password"
@@ -71,7 +82,32 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onToggleRegister }) => {
           </button>
         </form>
 
-        <div className="mt-8 text-center">
+        <div className="mt-6 flex flex-col items-center gap-4">
+          <button 
+            onClick={() => setShowSupport(!showSupport)}
+            className="text-slate-500 text-sm flex items-center gap-1 hover:text-indigo-600 transition"
+          >
+            <HelpCircle size={14} /> Login yoki parolni unutdingizmi?
+          </button>
+          
+          {showSupport && (
+            <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 text-center w-full animate-in fade-in slide-in-from-top-2">
+              <p className="text-sm text-indigo-800 font-medium mb-3">
+                Ma'lumotlarni tiklash uchun administratorga murojaat qiling:
+              </p>
+              <a 
+                href="https://t.me/admin_username" // Bu yerga haqiqiy admin linkini qo'yish kerak
+                target="_blank" 
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 bg-white text-indigo-600 px-4 py-2 rounded-lg font-bold shadow-sm hover:shadow-md transition"
+              >
+                <MessageCircle size={18} /> Telegram orqali bog'lanish
+              </a>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-8 text-center border-t pt-6">
           <p className="text-slate-500">
             Hisobingiz yo'qmi?{' '}
             <button

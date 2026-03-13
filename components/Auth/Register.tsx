@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { User } from '../../types';
 import { StorageService } from '../../services/storage';
-import { UserPlus, User as UserIcon, Phone, CheckCircle2 } from 'lucide-react';
+import { UserPlus, User as UserIcon, Phone, CheckCircle2, Lock, Eye, EyeOff } from 'lucide-react';
 
 interface RegisterProps {
   onRegistered: () => void;
@@ -13,25 +12,50 @@ export const Register: React.FC<RegisterProps> = ({ onRegistered, onToggleLogin 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
-  const [secretCode, setSecretCode] = useState<string | null>(null);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setError('');
+
+    // Parol uzunligini tekshirish
+    if (password.length < 6) {
+      setError("Parol kamida 6 ta belgidan iborat bo'lishi kerak.");
+      return;
+    }
+
+    // Parollar mosligini tekshirish
+    if (password !== confirmPassword) {
+      setError("Parollar bir-biriga mos kelmadi.");
+      return;
+    }
+
+    // Telefon raqami bandligini tekshirish
+    const users = StorageService.getUsers();
+    if (users.find(u => u.phone === phone)) {
+      setError("Ushbu telefon raqami allaqachon ro'yxatdan o'tgan.");
+      return;
+    }
+
     const newUser: User = {
       id: Date.now().toString(),
       firstName,
       lastName,
       phone,
-      secretCode: code,
-      role: 'student'
+      secretCode: password, // Endi foydalanuvchi o'zi kiritgan parol
+      role: 'student',
+      sessionId: null // Sessiya nazorati uchun
     };
 
     StorageService.addUser(newUser);
-    setSecretCode(code);
+    setIsRegistered(true);
   };
 
-  if (secretCode) {
+  if (isRegistered) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh]">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-slate-100 text-center">
@@ -39,18 +63,12 @@ export const Register: React.FC<RegisterProps> = ({ onRegistered, onToggleLogin 
             <CheckCircle2 size={32} />
           </div>
           <h2 className="text-2xl font-bold text-slate-800 mb-2">Muvaffaqiyatli ro'yxatdan o'tdingiz!</h2>
-          <p className="text-slate-500 mb-6">Sizning maxfiy kirish kodingiz:</p>
-          <div className="bg-slate-100 py-4 rounded-xl text-4xl font-mono font-bold text-indigo-600 tracking-widest mb-8">
-            {secretCode}
-          </div>
-          <p className="text-sm text-red-500 font-medium mb-8">
-            Diqqat! Ushbu kodni eslab qoling yoki saqlab oling.
-          </p>
+          <p className="text-slate-500 mb-8">Endi o'zingiz o'rnatgan parol orqali tizimga kirishingiz mumkin.</p>
           <button
             onClick={onRegistered}
             className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition"
           >
-            Tushunarli, Kirish qismiga o'tish
+            Tizimga kirish
           </button>
         </div>
       </div>
@@ -63,33 +81,34 @@ export const Register: React.FC<RegisterProps> = ({ onRegistered, onToggleLogin 
         <h1 className="text-3xl font-bold text-slate-800 text-center mb-2">Ro'yxatdan o'tish</h1>
         <p className="text-slate-500 text-center mb-8">Platformaga a'zo bo'lish uchun to'ldiring</p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
-              <UserIcon size={16} /> Ism
-            </label>
-            <input
-              type="text"
-              required
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
-              placeholder="Ismingizni kiriting"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
-              <UserIcon size={16} /> Familiya
-            </label>
-            <input
-              type="text"
-              required
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
-              placeholder="Familiyangizni kiriting"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                <UserIcon size={16} /> Ism
+              </label>
+              <input
+                type="text"
+                required
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                placeholder="Ism"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                <UserIcon size={16} /> Familiya
+              </label>
+              <input
+                type="text"
+                required
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                placeholder="Familiya"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
           </div>
 
           <div className="space-y-1">
@@ -106,9 +125,48 @@ export const Register: React.FC<RegisterProps> = ({ onRegistered, onToggleLogin 
             />
           </div>
 
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+              <Lock size={16} /> Parol o'rnatish
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                placeholder="Kamida 6 ta belgi"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+              <Lock size={16} /> Parolni tasdiqlang
+            </label>
+            <input
+              type="password"
+              required
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+              placeholder="Parolni qayta kiriting"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+          </div>
+
+          {error && <p className="text-red-500 text-sm text-center font-medium">{error}</p>}
+
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+            className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition flex items-center justify-center gap-2 mt-4"
           >
             <UserPlus size={20} /> Ro'yxatdan o'tish
           </button>
