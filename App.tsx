@@ -102,9 +102,11 @@ const App: React.FC = () => {
         {view === 'dashboard' && currentUser && (
           <Dashboard currentUser={currentUser} onStartTest={startTest} />
         )}
+
         {view === 'admin' && currentUser?.role === 'admin' && (
           <AdminPanel />
         )}
+
         {view === 'test' && currentUser && activeTest && (
           <TestEnvironment 
             test={activeTest} 

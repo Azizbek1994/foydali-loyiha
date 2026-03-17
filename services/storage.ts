@@ -1,18 +1,18 @@
-import { User, TestResult, Test, Feedback } from '../types';
+import { User, TestResult, Test, Feedback, Teacher } from '../types';
 import { INITIAL_TESTS } from '..';
 
 const KEYS = {
   USERS: 'edulearn_users',
   RESULTS: 'edulearn_results',
   TESTS: 'edulearn_tests',
-  FEEDBACK: 'edulearn_feedback'
+  FEEDBACK: 'edulearn_feedback',
+  TEACHERS: 'edulearn_teachers' // Yangi kalit so'z
 };
 
 export const StorageService = {
   getUsers: (): User[] => {
     const data = localStorage.getItem(KEYS.USERS);
     const users = data ? JSON.parse(data) : [];
-    // Ensure admin exists
     if (!users.find((u: User) => u.phone === 'admin')) {
       const admin: User = {
         id: 'admin',
@@ -34,11 +34,34 @@ export const StorageService = {
     localStorage.setItem(KEYS.USERS, JSON.stringify([...users, user]));
   },
 
-  // Yangi qo'shilgan funksiya: Foydalanuvchi ma'lumotlarini (masalan, sessionId) yangilash uchun
   updateUser: (updatedUser: User) => {
     const users = StorageService.getUsers();
     const updatedUsers = users.map(u => u.id === updatedUser.id ? updatedUser : u);
     localStorage.setItem(KEYS.USERS, JSON.stringify(updatedUsers));
+  },
+
+  // O'qituvchilar bilan ishlash (Yangi qo'shilgan qismlar)
+  getTeachers: (): Teacher[] => {
+    const data = localStorage.getItem(KEYS.TEACHERS);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveTeacher: (teacher: Teacher) => {
+    const teachers = StorageService.getTeachers();
+    const existingIndex = teachers.findIndex(t => t.phone === teacher.phone);
+    if (existingIndex > -1) {
+      const updated = [...teachers];
+      updated[existingIndex] = teacher;
+      localStorage.setItem(KEYS.TEACHERS, JSON.stringify(updated));
+    } else {
+      localStorage.setItem(KEYS.TEACHERS, JSON.stringify([...teachers, teacher]));
+    }
+  },
+
+  deleteTeacher: (phone: string) => {
+    const teachers = StorageService.getTeachers();
+    const updated = teachers.filter(t => t.phone !== phone);
+    localStorage.setItem(KEYS.TEACHERS, JSON.stringify(updated));
   },
 
   getTests: (): Test[] => {
@@ -50,8 +73,9 @@ export const StorageService = {
     const tests = StorageService.getTests();
     const existingIndex = tests.findIndex(t => t.id === test.id);
     if (existingIndex > -1) {
-      tests[existingIndex] = test;
-      localStorage.setItem(KEYS.TESTS, JSON.stringify(tests));
+      const updated = [...tests];
+      updated[existingIndex] = test;
+      localStorage.setItem(KEYS.TESTS, JSON.stringify(updated));
     } else {
       localStorage.setItem(KEYS.TESTS, JSON.stringify([...tests, test]));
     }
