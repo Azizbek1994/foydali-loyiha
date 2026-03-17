@@ -84,7 +84,7 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onStartTest }) => {
           {selectedSubject.replace('_', ' ')}: Sinfni tanlang
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {['1-sinf', '2-sinf', '3-sinf', '4-sinf','Muammoni hal qilish','Tanqidiy Fikirlash', '1-bosqich testlari','2-bosqich testlari'].map(grade => (
+          {['1-sinf', '2-sinf', '3-sinf', '4-sinf','Muammoni hal qilish','Tanqidiy Fikirlash', 'Birinchi bosqich testlari','Ikkinchi bosqich testlari'].map(grade => (
             <button
               key={grade.toString()}
               onClick={() => handleGradeSelect(grade)}
